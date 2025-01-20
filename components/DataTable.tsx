@@ -83,126 +83,127 @@ const DataTable = () => {
     return <div className="text-red-600 p-4 bg-red-50 rounded">{error}</div>;
   }
 
+  const headerElement = () => (
+    <div className="mb-4 flex items-center gap-4 justify-between">
+      <div className="relative flex-1 max-w-md">
+        <Search
+          className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"
+          size={20}
+        />
+        <input
+          type="text"
+          placeholder="Search domains..."
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+          className="w-full pl-10 pr-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500"
+        />
+      </div>
+      <button
+        className="bg-red-700 p-2 rounded-lg "
+        onClick={() => {
+          localStorage.removeItem("isLoggedIn");
+          router.push("/");
+        }}
+      >
+        Log Out
+      </button>
+    </div>
+  );
+
+  const tableElement = () => (
+    <div className="border rounded-lg bg-white text-black">
+      <div className="overflow-x-auto">
+        <div className="bg-blue-100 sticky top-0">
+          <div className="flex">
+            {[
+              "Domain",
+              "Niche 1",
+              "Niche 2",
+              "Traffic",
+              "DR",
+              "DA",
+              "Language",
+              "Price",
+              "Spam Score",
+            ].map((header, index) => {
+              const key = header
+                .toLowerCase()
+                .replace(" ", "") as keyof DataRow;
+              return (
+                <div
+                  key={index}
+                  className="px-4 py-2 flex-1 cursor-pointer hover:bg-blue-300 flex items-center"
+                  onClick={() => handleSort(key)}
+                >
+                  {header}
+                  {sortConfig.key === key ? (
+                    <span className="ml-1">
+                      {sortConfig.direction === "asc" ? (
+                        <ChevronUp size={16} />
+                      ) : (
+                        <ChevronDown size={16} />
+                      )}
+                    </span>
+                  ) : (
+                    <ChevronsUpDown size={16} style={{ marginLeft: "16px" }} />
+                  )}
+                </div>
+              );
+            })}
+          </div>
+        </div>
+
+        <div
+          className="overflow-y-auto"
+          style={{ height: `${VISIBLE_ROWS * ROW_HEIGHT}px` }}
+          onScroll={handleScroll}
+        >
+          <div style={{ height: `${totalHeight}px`, position: "relative" }}>
+            <div
+              style={{
+                transform: `translateY(${startIndex * ROW_HEIGHT}px)`,
+              }}
+            >
+              {visibleData.map((row, index) => (
+                <div
+                  key={index}
+                  className="flex border-t hover:bg-gray-200 hover:cursor-pointer"
+                  style={{ height: `${ROW_HEIGHT}px` }}
+                  onClick={() => handleRowClick(row)}
+                >
+                  <div className="flex-1 px-4 py-2 truncate">{row.domain}</div>
+                  <div className="flex-1 px-4 py-2 truncate">{row.niche1}</div>
+                  <div className="flex-1 px-4 py-2 truncate">{row.niche2}</div>
+                  <div className="flex-1 px-4 py-2 truncate">
+                    {row.traffic.toLocaleString()}
+                  </div>
+                  <div className="flex-1 px-4 py-2 truncate">{row.dr}</div>
+                  <div className="flex-1 px-4 py-2 truncate">{row.da}</div>
+                  <div className="flex-1 px-4 py-2 truncate">
+                    {row.language}
+                  </div>
+                  <div className="flex-1 px-4 py-2 truncate">
+                    ${row.price.toLocaleString()}
+                  </div>
+                  <div className="flex-1 px-4 py-2 truncate">
+                    {row.spamScore}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+
   return (
     <div className="p-4 text-black">
-      <div className="mb-4 flex items-center gap-4 justify-between">
-        <div className="relative flex-1 max-w-md">
-          <Search
-            className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"
-            size={20}
-          />
-          <input
-            type="text"
-            placeholder="Search domains..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full pl-10 pr-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500"
-          />
-        </div>
-        <button
-          className="bg-red-700 p-2 rounded-lg "
-          onClick={() => {
-            localStorage.removeItem("isLoggedIn");
-            router.push("/");
-          }}
-        >
-          Log Out
-        </button>
-      </div>
+      
+      {headerElement()}
 
-      <div className="border rounded-lg bg-white text-black">
-        <div className="overflow-x-auto">
-          <div className="bg-blue-100 sticky top-0">
-            <div className="flex">
-              {[
-                "Domain",
-                "Niche 1",
-                "Niche 2",
-                "Traffic",
-                "DR",
-                "DA",
-                "Language",
-                "Price",
-                "Spam Score",
-              ].map((header, index) => {
-                const key = header
-                  .toLowerCase()
-                  .replace(" ", "") as keyof DataRow;
-                return (
-                  <div
-                    key={index}
-                    className="px-4 py-2 flex-1 cursor-pointer hover:bg-blue-300 flex items-center"
-                    onClick={() => handleSort(key)}
-                  >
-                    {header}
-                    {sortConfig.key === key ? (
-                      <span className="ml-1">
-                        {sortConfig.direction === "asc" ? (
-                          <ChevronUp size={16} />
-                        ) : (
-                          <ChevronDown size={16} />
-                        )}
-                      </span>
-                    ) : (
-                      <ChevronsUpDown
-                        size={16}
-                        style={{ marginLeft: "16px" }}
-                      />
-                    )}
-                  </div>
-                );
-              })}
-            </div>
-          </div>
+      {tableElement()}
 
-          <div
-            className="overflow-y-auto"
-            style={{ height: `${VISIBLE_ROWS * ROW_HEIGHT}px` }}
-            onScroll={handleScroll}
-          >
-            <div style={{ height: `${totalHeight}px`, position: "relative" }}>
-              <div
-                style={{
-                  transform: `translateY(${startIndex * ROW_HEIGHT}px)`,
-                }}
-              >
-                {visibleData.map((row, index) => (
-                  <div
-                    key={index}
-                    className="flex border-t hover:bg-gray-200 hover:cursor-pointer"
-                    style={{ height: `${ROW_HEIGHT}px` }}
-                    onClick={() => handleRowClick(row)}
-                  >
-                    <div className="flex-1 px-4 py-2 truncate">
-                      {row.domain}
-                    </div>
-                    <div className="flex-1 px-4 py-2 truncate">
-                      {row.niche1}
-                    </div>
-                    <div className="flex-1 px-4 py-2 truncate">
-                      {row.niche2}
-                    </div>
-                    <div className="flex-1 px-4 py-2 truncate">
-                      {row.traffic.toLocaleString()}
-                    </div>
-                    <div className="flex-1 px-4 py-2 truncate">{row.dr}</div>
-                    <div className="flex-1 px-4 py-2 truncate">{row.da}</div>
-                    <div className="flex-1 px-4 py-2 truncate">
-                      {row.language}
-                    </div>
-                    <div className="flex-1 px-4 py-2 truncate">
-                      ${row.price.toLocaleString()}
-                    </div>
-                    <div className="flex-1 px-4 py-2 truncate">
-                      {row.spamScore}
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
       {selectedDomain && (
         <DomainModal
           domain={selectedDomain}
