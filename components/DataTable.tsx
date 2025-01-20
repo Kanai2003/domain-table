@@ -1,6 +1,6 @@
 "use client";
 import React, { useState, useMemo, useEffect } from "react";
-import { ChevronUp, ChevronDown, Search } from "lucide-react";
+import { ChevronUp, ChevronDown, Search, ChevronsUpDown } from "lucide-react";
 import { useXLSXData } from "../hooks/useXLSXData";
 import { DataRow, SortConfig } from "@/types/type";
 import { useRouter } from "next/navigation";
@@ -85,7 +85,7 @@ const DataTable = () => {
 
   return (
     <div className="p-4 text-black">
-      <div className="mb-4 flex items-center gap-4">
+      <div className="mb-4 flex items-center gap-4 justify-between">
         <div className="relative flex-1 max-w-md">
           <Search
             className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"
@@ -112,7 +112,7 @@ const DataTable = () => {
 
       <div className="border rounded-lg bg-white text-black">
         <div className="overflow-x-auto">
-          <div className="bg-gray-100 sticky top-0">
+          <div className="bg-blue-100 sticky top-0">
             <div className="flex">
               {[
                 "Domain",
@@ -131,11 +131,11 @@ const DataTable = () => {
                 return (
                   <div
                     key={index}
-                    className="px-4 py-2 flex-1 cursor-pointer hover:bg-gray-200 flex items-center"
+                    className="px-4 py-2 flex-1 cursor-pointer hover:bg-blue-300 flex items-center"
                     onClick={() => handleSort(key)}
                   >
                     {header}
-                    {sortConfig.key === key && (
+                    {sortConfig.key === key ? (
                       <span className="ml-1">
                         {sortConfig.direction === "asc" ? (
                           <ChevronUp size={16} />
@@ -143,6 +143,11 @@ const DataTable = () => {
                           <ChevronDown size={16} />
                         )}
                       </span>
+                    ) : (
+                      <ChevronsUpDown
+                        size={16}
+                        style={{ marginLeft: "16px" }}
+                      />
                     )}
                   </div>
                 );
@@ -164,7 +169,7 @@ const DataTable = () => {
                 {visibleData.map((row, index) => (
                   <div
                     key={index}
-                    className="flex border-t hover:bg-gray-100 hover:cursor-pointer"
+                    className="flex border-t hover:bg-gray-200 hover:cursor-pointer"
                     style={{ height: `${ROW_HEIGHT}px` }}
                     onClick={() => handleRowClick(row)}
                   >
