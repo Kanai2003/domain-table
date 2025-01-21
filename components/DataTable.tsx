@@ -19,12 +19,22 @@ const DataTable = () => {
   });
   const [selectedDomain, setSelectedDomain] = useState<DataRow | null>(null);
   const [scrollTop, setScrollTop] = useState(0);
+  const [isSmallScreen, setIsSmallScreen] = useState(window.innerWidth < 640);
+
+  useEffect(() => {
+    const handleResize = () => {
+      setIsSmallScreen(window.innerWidth < 640);
+    };
+
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
 
   useEffect(() => {
     if (localStorage.getItem("isLoggedIn") !== "true") {
       router.push("/");
     }
-  });
+  }, [router]);
 
   const processedData = useMemo(() => {
     let result = [...data];
@@ -110,100 +120,101 @@ const DataTable = () => {
     </div>
   );
 
-  const tableElement = () => (
-    <div className="border rounded-lg bg-white text-black">
-      <div className="overflow-x-auto">
-        <div className="bg-blue-100 sticky top-0">
-          <div className="flex">
-            {[
-              "Domain",
-              "Niche 1",
-              "Niche 2",
-              "Traffic",
-              "DR",
-              "DA",
-              "Language",
-              "Price",
-              "Spam Score",
-            ].map((header, index) => {
-              const key = header
-                .toLowerCase()
-                .replace(" ", "") as keyof DataRow;
-              return (
-                <div
-                  key={index}
-                  className="px-4 py-2 flex-1 cursor-pointer hover:bg-blue-300 flex items-center"
-                  onClick={() => handleSort(key)}
-                >
-                  {header}
-                  {sortConfig.key === key ? (
-                    <span className="ml-1">
-                      {sortConfig.direction === "asc" ? (
-                        <ChevronUp size={16} />
-                      ) : (
-                        <ChevronDown size={16} />
-                      )}
-                    </span>
-                  ) : (
-                    <ChevronsUpDown size={16} style={{ marginLeft: "16px" }} />
-                  )}
-                </div>
-              );
-            })}
-          </div>
-        </div>
+  const tableElement = () => {
+    const columns = isSmallScreen
+      ? ["Domain", "Traffic", "Price"]
+      : [
+          "Domain",
+          "Niche 1",
+          "Niche 2",
+          "Traffic",
+          "DR",
+          "DA",
+          "Language",
+          "Price",
+          "Spam Score",
+        ];
 
-        <div
-          className="overflow-y-auto"
-          style={{ height: `${VISIBLE_ROWS * ROW_HEIGHT}px` }}
-          onScroll={handleScroll}
-        >
-          <div style={{ height: `${totalHeight}px`, position: "relative" }}>
-            <div
-              style={{
-                transform: `translateY(${startIndex * ROW_HEIGHT}px)`,
-              }}
-            >
-              {visibleData.map((row, index) => (
-                <div
-                  key={index}
-                  className="flex border-t hover:bg-gray-200 hover:cursor-pointer"
-                  style={{ height: `${ROW_HEIGHT}px` }}
-                  onClick={() => handleRowClick(row)}
-                >
-                  <div className="flex-1 px-4 py-2 truncate">{row.domain}</div>
-                  <div className="flex-1 px-4 py-2 truncate">{row.niche1}</div>
-                  <div className="flex-1 px-4 py-2 truncate">{row.niche2}</div>
-                  <div className="flex-1 px-4 py-2 truncate">
-                    {row.traffic.toLocaleString()}
+    return (
+      <div className="border rounded-lg bg-white text-black">
+        <div className="overflow-x-auto">
+          <div className="bg-blue-100 sticky top-0">
+            <div className="flex">
+              {columns.map((header, index) => {
+                const key =
+                  header === "Spam Score"
+                    ? "spamScore"
+                    : (header.toLowerCase().replace(" ", "") as keyof DataRow);
+                return (
+                  <div
+                    key={index}
+                    className="px-4 py-2 flex-1 cursor-pointer hover:bg-blue-300 flex items-center"
+                    onClick={() => handleSort(key)}
+                  >
+                    {header}
+                    {sortConfig.key === key ? (
+                      <span className="ml-1">
+                        {sortConfig.direction === "asc" ? (
+                          <ChevronUp size={16} />
+                        ) : (
+                          <ChevronDown size={16} />
+                        )}
+                      </span>
+                    ) : (
+                      <ChevronsUpDown
+                        size={16}
+                        style={{ marginLeft: "16px" }}
+                      />
+                    )}
                   </div>
-                  <div className="flex-1 px-4 py-2 truncate">{row.dr}</div>
-                  <div className="flex-1 px-4 py-2 truncate">{row.da}</div>
-                  <div className="flex-1 px-4 py-2 truncate">
-                    {row.language}
+                );
+              })}
+            </div>
+          </div>
+
+          <div
+            className="overflow-y-auto"
+            style={{ height: `${VISIBLE_ROWS * ROW_HEIGHT}px` }}
+            onScroll={handleScroll}
+          >
+            <div style={{ height: `${totalHeight}px`, position: "relative" }}>
+              <div
+                style={{
+                  transform: `translateY(${startIndex * ROW_HEIGHT}px)`,
+                }}
+              >
+                {visibleData.map((row, index) => (
+                  <div
+                    key={index}
+                    className="flex border-t hover:bg-gray-200 hover:cursor-pointer"
+                    style={{ height: `${ROW_HEIGHT}px` }}
+                    onClick={() => handleRowClick(row)}
+                  >
+                    {columns.map((col, colIndex) => (
+                      <div key={colIndex} className="flex-1 px-4 py-2 truncate">
+                        {col === "Spam Score"
+                          ? row["spamScore" as keyof DataRow]
+                          : row[
+                              col
+                                .toLowerCase()
+                                .replace(" ", "") as keyof DataRow
+                            ]}
+                      </div>
+                    ))}
                   </div>
-                  <div className="flex-1 px-4 py-2 truncate">
-                    ${row.price.toLocaleString()}
-                  </div>
-                  <div className="flex-1 px-4 py-2 truncate">
-                    {row.spamScore}
-                  </div>
-                </div>
-              ))}
+                ))}
+              </div>
             </div>
           </div>
         </div>
       </div>
-    </div>
-  );
+    );
+  };
 
   return (
     <div className="p-4 text-black">
-      
       {headerElement()}
-
       {tableElement()}
-
       {selectedDomain && (
         <DomainModal
           domain={selectedDomain}
