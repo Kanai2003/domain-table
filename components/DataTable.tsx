@@ -19,13 +19,14 @@ const DataTable = () => {
   });
   const [selectedDomain, setSelectedDomain] = useState<DataRow | null>(null);
   const [scrollTop, setScrollTop] = useState(0);
-  const [isSmallScreen, setIsSmallScreen] = useState(window.innerWidth < 640);
+  const [isSmallScreen, setIsSmallScreen] = useState(false);
 
   useEffect(() => {
     const handleResize = () => {
       setIsSmallScreen(window.innerWidth < 640);
     };
 
+    handleResize(); // Set initial value
     window.addEventListener("resize", handleResize);
     return () => window.removeEventListener("resize", handleResize);
   }, []);
